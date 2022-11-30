@@ -193,6 +193,24 @@ export type OpenLoginOptions = {
    * @internal
    */
   _sessionNamespace?: string;
+
+  /**
+   * How long should a login session last at a minimum in seconds
+   *
+   * @defaultValue 86400 seconds
+   * @remarks Max value of sessionTime can be 7 * 86400 (7 days)
+   */
+  sessionTime?: number;
+
+  /**
+   * By default user will be logged out after the sessionTime expires.
+   * You can set this option to true if you want to generate a new session on every login before sessionTime expires.
+   * If user doesn't logs in within sessionTime, user will be logged out.
+   *
+   * @defaultValue false
+   *
+   */
+  enableSessionRefresh?: boolean;
 };
 
 export type LoginParams = BaseRedirectParams & {

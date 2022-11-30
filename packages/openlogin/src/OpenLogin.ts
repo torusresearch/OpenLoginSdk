@@ -44,6 +44,8 @@ export type OpenLoginState = {
   loginConfig: LoginConfig;
   storageServerUrl: string;
   sessionNamespace: string;
+  enableSessionRefresh: boolean;
+  sessionTime?: number;
 };
 
 class OpenLogin {
@@ -89,6 +91,8 @@ class OpenLogin {
       _storageServerUrl: options._storageServerUrl ?? "https://broadcast-server.tor.us",
       storageKey: options.storageKey === "session" ? "session" : "local",
       _sessionNamespace: options._sessionNamespace ?? "",
+      enableSessionRefresh: options.enableSessionRefresh ?? false,
+      sessionTime: options.sessionTime,
     });
   }
 
@@ -113,6 +117,8 @@ class OpenLogin {
       whiteLabel: options.whiteLabel,
       storageServerUrl: options._storageServerUrl,
       sessionNamespace: options._sessionNamespace,
+      enableSessionRefresh: options.enableSessionRefresh,
+      sessionTime: options.sessionTime,
     };
   }
 
@@ -192,6 +198,7 @@ class OpenLogin {
 
     const loginParams: LoginParams = {
       loginProvider: params.loginProvider,
+      sessionTime: this.state.sessionTime,
       ...defaultParams,
       ...params,
     };
@@ -407,11 +414,24 @@ class OpenLogin {
   }
 
   async _getData(): Promise<Record<string, unknown>> {
-    return this.request<Record<string, unknown>>({
+    const newSessionId = randomId();
+    const data = await this.request<Record<string, unknown>>({
       allowedInteractions: [ALLOWED_INTERACTIONS.JRPC],
       method: OPENLOGIN_METHOD.GET_DATA,
-      params: [{}],
+      params: [
+        this.state.enableSessionRefresh
+          ? {
+              sessionRefreshId: newSessionId,
+              sessionTime: this.state.sessionTime,
+            }
+          : {},
+      ],
     });
+
+    if (this.state.enableSessionRefresh) {
+      this.state.store.set("sessionId", newSessionId);
+    }
+    return data;
   }
 
   _syncState(newState: Record<string, unknown>): void {
