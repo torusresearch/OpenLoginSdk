@@ -1,5 +1,5 @@
+import OpenLogin from "@toruslabs/openlogin";
 import { WhiteLabelData } from "@toruslabs/openlogin-jrpc";
-import OpenLogin from "openlogin";
 
 import loginConfig from "./loginConfig";
 
@@ -14,13 +14,12 @@ export function getOpenLoginInstance(whiteLabel?: WhiteLabelData) {
       // clientId is not required for localhost, you can set it to any string
       // for development
       clientId: YOUR_PROJECT_ID,
-      network: "testnet",
-      uxMode: "redirect",
+      network: "development",
+      uxMode: "popup",
       whiteLabel,
       loginConfig,
       storageKey: "session",
     });
   }
-  if (whiteLabel) openLoginInstance.state.whiteLabel = whiteLabel;
   return openLoginInstance;
 }

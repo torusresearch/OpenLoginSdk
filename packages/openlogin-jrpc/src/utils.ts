@@ -241,6 +241,7 @@ export type SessionInfo = {
   _whiteLabelData?: WhiteLabelData;
   _loginConfig: LoginConfig;
   _sessionId?: string;
+  _isNewSession?: boolean;
   _sessionNamespace?: string;
   _webauthnTransports?: AuthenticatorTransport[];
 };

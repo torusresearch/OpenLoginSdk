@@ -10,6 +10,8 @@ export const UX_MODE = {
 export const OPENLOGIN_METHOD = {
   LOGIN: "openlogin_login",
   LOGOUT: "openlogin_logout",
+  ENABLE_MFA: "openlogin_enable_mfa",
+  SHOW_SETTINGS: "openlogin_show_settings",
   CHECK_3PC_SUPPORT: "openlogin_check_3PC_support",
   SET_PID_DATA: "openlogin_set_pid_data",
   GET_DATA: "openlogin_get_data",
@@ -61,3 +63,5 @@ export const MFA_LEVELS = {
   MANDATORY: "mandatory",
   NONE: "none",
 } as const;
+
+export const SESSION_EXPIRED = "SESSION_EXPIRED";

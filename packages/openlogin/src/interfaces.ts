@@ -320,4 +320,10 @@ export type OpenloginUserInfo = {
    * custom verifiers.
    */
   oAuthAccessToken?: string;
+
+  /**
+   * If `true` means that mfa of the account is enabled.
+   *
+   */
+  isMfaEnabled: boolean;
 };

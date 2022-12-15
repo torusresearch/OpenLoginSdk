@@ -4,7 +4,7 @@ import { getRpcPromiseCallback, JRPCRequest, LoginConfig, OriginData, SessionInf
 import { base64url, jsonToBase64, keccak, randomId } from "@toruslabs/openlogin-utils";
 import merge from "lodash.merge";
 
-import { ALLOWED_INTERACTIONS, OPENLOGIN_METHOD, OPENLOGIN_NETWORK, UX_MODE } from "./constants";
+import { ALLOWED_INTERACTIONS, OPENLOGIN_METHOD, OPENLOGIN_NETWORK, SESSION_EXPIRED, UX_MODE } from "./constants";
 import {
   BaseLogoutParams,
   BaseRedirectParams,
@@ -43,6 +43,7 @@ export type OpenLoginState = {
   whiteLabel: WhiteLabelData;
   loginConfig: LoginConfig;
   storageServerUrl: string;
+  isMfaEnabled: boolean;
   sessionNamespace: string;
   webauthnTransports: AuthenticatorTransport[];
 };
@@ -118,6 +119,7 @@ class OpenLogin {
       support3PC: !options.no3PC,
       whiteLabel: options.whiteLabel,
       storageServerUrl: options._storageServerUrl,
+      isMfaEnabled: false,
       sessionNamespace: options._sessionNamespace,
       webauthnTransports: options.webauthnTransports,
     };
@@ -219,6 +221,60 @@ class OpenLogin {
     return { privKey: this.privKey };
   }
 
+  async enableMfa(): Promise<void> {
+    try {
+      this._syncState(await this._getData());
+      const storeData = this.state.store.getStore();
+      if (!this.privKey) throw new Error("Please login first.");
+      if (storeData.isMfaEnabled) {
+        throw new Error("Mfa is already enabled for this account");
+      }
+      const params: Record<string, unknown> = {};
+      // defaults
+      params.redirectUrl = this.state.redirectUrl;
+
+      await this.request<void>({
+        method: OPENLOGIN_METHOD.ENABLE_MFA,
+        params: [params],
+        startUrl: this.state.startUrl,
+        popupUrl: this.state.popupUrl,
+        allowedInteractions: [ALLOWED_INTERACTIONS.POPUP, ALLOWED_INTERACTIONS.REDIRECT],
+      });
+      this._syncState(await this._getData());
+    } catch (error) {
+      if (error?.message === SESSION_EXPIRED) {
+        this._syncState(await this._getData());
+        this.state.store.set("sessionId", "");
+      }
+      throw error;
+    }
+  }
+
+  async showSettings(): Promise<void> {
+    try {
+      this._syncState(await this._getData());
+      if (!this.privKey) throw new Error("Please login first.");
+
+      const params: Record<string, unknown> = {};
+      // defaults
+      params.redirectUrl = this.state.redirectUrl;
+
+      await this.request<void>({
+        method: OPENLOGIN_METHOD.SHOW_SETTINGS,
+        params: [params],
+        startUrl: this.state.startUrl,
+        popupUrl: this.state.popupUrl,
+        allowedInteractions: [ALLOWED_INTERACTIONS.POPUP, ALLOWED_INTERACTIONS.REDIRECT],
+      });
+    } catch (error) {
+      if (error?.message === SESSION_EXPIRED) {
+        this._syncState(await this._getData());
+        this.state.store.set("sessionId", "");
+      }
+      throw error;
+    }
+  }
+
   async logout(logoutParams: Partial<BaseLogoutParams> & Partial<BaseRedirectParams> = {}): Promise<void> {
     const params: Record<string, unknown> = {};
     // defaults
@@ -242,6 +298,7 @@ class OpenLogin {
     });
 
     this.state.privKey = "";
+    this.state.store.set("sessionId", "");
     return res;
   }
 
@@ -286,6 +343,7 @@ class OpenLogin {
     if (!session._sessionId) {
       const sessionId = randomId();
       session._sessionId = sessionId as string;
+      session._isNewSession = true;
       this.state.store.set("sessionId", sessionId);
     }
 
@@ -504,6 +562,7 @@ class OpenLogin {
         typeOfLogin: (storeData.typeOfLogin as LOGIN_PROVIDER_TYPE | CUSTOM_LOGIN_PROVIDER_TYPE) || "",
         dappShare: (storeData.dappShare as string) || "",
         idToken: (storeData.idToken as string) || "",
+        isMfaEnabled: (storeData.isMfaEnabled as boolean) || false,
         oAuthIdToken: (storeData.oAuthIdToken as string) || "",
         oAuthAccessToken: (storeData.oAuthAccessToken as string) || "",
       };

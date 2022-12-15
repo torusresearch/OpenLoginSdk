@@ -1,5 +1,5 @@
+import { LOGIN_PROVIDER } from "@toruslabs/openlogin";
 import { LoginConfig } from "@toruslabs/openlogin-jrpc";
-import { LOGIN_PROVIDER } from "openlogin";
 
 export default {
   // email_passwordless: {

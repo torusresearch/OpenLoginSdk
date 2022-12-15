@@ -41,6 +41,8 @@
               <div class="grid grid-cols-2 gap-2">
                 <button class="btn" @click="getUserInfo">Get user info</button>
                 <button class="btn" @click="getEd25519Key">Get Ed25519Key</button>
+                <button @click="enableMfa">Setup Mfa</button>
+                <button @click="showSettings">Show Settings</button>
               </div>
             </div>
             <div class="col-span-2 text-left">
@@ -111,7 +113,7 @@ export default Vue.extend({
   },
   async mounted() {
     this.loading = true;
-    const openlogin = getOpenLoginInstance();
+    const openlogin = getOpenLoginInstance(whitelabel);
     await openlogin.init();
     if (openlogin.privKey) {
       this.privKey = openlogin.privKey;
@@ -143,6 +145,7 @@ export default Vue.extend({
           //   login_hint: 'hello@yourapp.com',
           // },
           // sessionTime: 30, //seconds
+          curve: "ed25519",
         });
         if (privKey) {
           this.privKey = openlogin.privKey;
@@ -169,6 +172,7 @@ export default Vue.extend({
           mfaLevel: "mandatory",
           loginProvider: "",
           redirectUrl: `${window.origin}`,
+          curve: "ed25519",
         });
         if (privKey) {
           this.privKey = privKey;
@@ -201,6 +205,29 @@ export default Vue.extend({
       const openlogin = getOpenLoginInstance();
       const userInfo = await openlogin.getUserInfo();
       this.printToConsole(userInfo);
+    },
+    async enableMfa() {
+      const openlogin = getOpenLoginInstance();
+
+      try {
+        await openlogin.enableMfa();
+      } catch (error) {
+        console.log("error", error);
+      } finally {
+        this.privKey = openlogin.privKey;
+      }
+    },
+
+    async showSettings() {
+      const openlogin = getOpenLoginInstance();
+
+      try {
+        await openlogin.showSettings();
+      } catch (error) {
+        console.log("error", error);
+      } finally {
+        this.privKey = openlogin.privKey;
+      }
     },
 
     getEd25519Key() {

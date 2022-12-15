@@ -205,3 +205,10 @@ export function getPopupFeatures(): string {
   const features = `titlebar=0,toolbar=0,status=0,location=0,menubar=0,height=${h / systemZoom},width=${w / systemZoom},top=${top},left=${left}`;
   return features;
 }
+
+export const isNullishValue = (val: unknown): boolean => {
+  if (val === "") return true;
+  if (val === null) return true;
+  if (val === undefined) return true;
+  return false;
+};
