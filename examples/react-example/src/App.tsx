@@ -32,6 +32,7 @@ function App() {
     setLoading(true);
     try {
       const privKey = await openlogin.login({
+        sessionTime: 60,
         // pass empty string '' as loginProvider to open default torus modal
         // with all default supported login providers or you can pass specific
         // login provider from available list to set as default.

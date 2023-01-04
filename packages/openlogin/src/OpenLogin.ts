@@ -242,6 +242,9 @@ class OpenLogin {
     });
 
     this.state.privKey = "";
+    this.state.store.set("sessionId", "");
+    this.state.store.set("refreshToken", "");
+    this.state.store.set("idToken", "");
     return res;
   }
 
@@ -418,7 +421,12 @@ class OpenLogin {
     return this.request<Record<string, unknown>>({
       allowedInteractions: [ALLOWED_INTERACTIONS.JRPC],
       method: OPENLOGIN_METHOD.GET_DATA,
-      params: [{}],
+      params: [
+        {
+          appRefreshToken: this.state.store.get("refreshToken"),
+          appIdToken: this.state.store.get("idToken"),
+        },
+      ],
     });
   }
 
@@ -428,7 +436,11 @@ class OpenLogin {
         throw new Error("expected store to be an object");
       }
       Object.keys(newState.store).forEach((key) => {
-        this.state.store.set(key, newState.store[key]);
+        // empty values of refresh, id token and refreshed session id might come coz of 3pc issues.
+        // reset only if new value is present or if privKey is not present (logout case)
+        if (newState.store[key] || !newState.privKey) {
+          this.state.store.set(key, newState.store[key]);
+        }
       });
     }
     const { store } = this.state;
