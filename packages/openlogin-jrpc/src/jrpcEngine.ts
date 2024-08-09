@@ -1,6 +1,7 @@
-import { rpcErrors, serializeError } from "@metamask/rpc-errors";
 import { Duplex } from "readable-stream";
 
+import { JsonRpcErrorsArg, rpcErrors } from "./errors/errors";
+import { serializeError } from "./errors/utils";
 import {
   JRPCEngineEndCallback,
   JRPCEngineNextCallback,
@@ -9,6 +10,7 @@ import {
   JRPCRequest,
   JRPCResponse,
   Maybe,
+  OptionalDataWithOptionalCause,
   RequestArguments,
   SendCallBack,
 } from "./interfaces";
@@ -427,7 +429,7 @@ export function providerFromEngine(engine: JRPCEngine): SafeEventEmitterProvider
         shouldIncludeStack: true,
       });
 
-      throw rpcErrors.internal(err);
+      throw rpcErrors.internal(err as JsonRpcErrorsArg<OptionalDataWithOptionalCause>);
     }
     return res.result as U;
   };

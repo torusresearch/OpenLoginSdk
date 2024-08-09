@@ -45,10 +45,35 @@ export interface JRPCSuccess<T> extends JRPCBase {
   result: Maybe<T>;
 }
 
+/**
+ * A data object, that must be either:
+ *
+ * - A JSON-serializable object.
+ * - An object with a `cause` property that is an error-like value, and any
+ * other properties that are JSON-serializable.
+ */
+export type DataWithOptionalCause =
+  | Json
+  | {
+      // Unfortunately we can't use just `Json` here, because all properties of
+      // an object with an index signature must be assignable to the index
+      // signature's type. So we have to use `Json | unknown` instead.
+      [key: string]: Json | unknown;
+      cause?: unknown;
+    };
+
+/**
+ * A data object, that must be either:
+ *
+ * - A valid DataWithOptionalCause value.
+ * - undefined.
+ */
+export type OptionalDataWithOptionalCause = undefined | DataWithOptionalCause;
+
 export interface JRPCError {
   code: number;
   message: string;
-  data?: unknown;
+  data?: DataWithOptionalCause;
   stack?: string;
 }
 

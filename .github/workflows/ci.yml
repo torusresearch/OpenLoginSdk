@@ -57,7 +57,7 @@ jobs:
         env:
           SOURCE_DIR: "./examples/vue-example/dist"
           AWS_REGION: "us-east-1"
-          AWS_S3_BUCKET: "demo-openlogin.web3auth.io"
+          AWS_S3_BUCKET: "demo-openlogin-v8.web3auth.io"
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -66,7 +66,7 @@ jobs:
         uses: chaitanyapotti/cloudfront-update-distribution@v4
         if: github.ref == 'refs/heads/master'
         with:
-          cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+          cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID_V8 }}
           cloudfront-invalidation-required: true
           cloudfront-invalidation-path: "/*"
           cloudfront-wait-for-service-update: false

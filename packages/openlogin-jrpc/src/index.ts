@@ -1,4 +1,5 @@
 export { default as BasePostMessageStream } from "./basePostMessageStream";
+export * from "./errors";
 export * from "./interfaces";
 export * from "./jrpc";
 export * from "./jrpcEngine";
